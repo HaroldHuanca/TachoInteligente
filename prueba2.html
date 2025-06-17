@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tacho Inteligente</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f9f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 500px;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #2e7d32;
+            margin-bottom: 30px;
+        }
+        
+        .machine-display {
+            background-color: #e8f5e9;
+            border: 2px solid #c8e6c9;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .display-text {
+            font-size: 1.2rem;
+            margin: 10px 0;
+        }
+        
+        .points-display {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2e7d32;
+            margin-top: 10px;
+        }
+        
+        .btn {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 15px;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn i {
+            margin-right: 10px;
+        }
+        
+        .btn:hover {
+            background-color: #388e3c;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .machine-icon {
+            font-size: 3rem;
+            color: #4caf50;
+            margin-bottom: 20px;
+        }
+        
+        .status-indicator {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-left: 10px;
+        }
+        
+        .status-on {
+            background-color: #4caf50;
+            box-shadow: 0 0 10px #4caf50;
+        }
+        
+        .status-off {
+            background-color: #f44336;
+        }
+        
+        .status-processing {
+            background-color: #ffc107;
+            box-shadow: 0 0 10px #ffc107;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .card-slot {
+            width: 80%;
+            height: 5px;
+            background-color: #bdbdbd;
+            margin: 20px auto;
+            border-radius: 0 0 5px 5px;
+            position: relative;
+        }
+        
+        .card-slot::after {
+            content: "";
+            position: absolute;
+            top: -15px;
+            left: 0;
+            right: 0;
+            margin: auto;
+            width: 60%;
+            height: 20px;
+            background-color: #757575;
+            border-radius: 5px 5px 0 0;
+        }
+        
+        .waste-input {
+            width: 80%;
+            height: 30px;
+            background-color: #e0e0e0;
+            margin: 20px auto;
+            border-radius: 5px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .waste-input::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+            animation: shine 2s infinite;
+        }
+        
+        @keyframes shine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="machine-icon">
+            <i class="fas fa-trash-alt"></i>
+        </div>
+        <h1>Tacho Inteligente <span class="status-indicator status-off" id="status-indicator"></span></h1>
+        
+        <div class="machine-display" id="machine-display">
+            <div class="display-text" id="display-text">Presione INICIAR para comenzar</div>
+            <div class="points-display" id="points-display"></div>
+        </div>
+        
+        <div class="card-slot" id="card-slot" style="display: none;"></div>
+        <div class="waste-input" id="waste-input" style="display: none;"></div>
+        
+        <button class="btn" id="start-btn">
+            <i class="fas fa-power-off"></i> INICIAR
+        </button>
+    </div>
+
+    <script>
+        // Elementos del DOM
+        const startBtn = document.getElementById('start-btn');
+        const displayText = document.getElementById('display-text');
+        const pointsDisplay = document.getElementById('points-display');
+        const statusIndicator = document.getElementById('status-indicator');
+        const cardSlot = document.getElementById('card-slot');
+        const wasteInput = document.getElementById('waste-input');
+        const machineDisplay = document.getElementById('machine-display');
+        
+        // Variables de estado
+        let isProcessing = false;
+        let currentPoints = 0;
+        
+        // Tipos de residuos posibles
+        const wasteTypes = [
+            "desechos orgánicos",
+            "desechos inorgánicos",
+            "no son desechos"
+        ];
+        
+        // Función para iniciar el proceso
+        function startProcess() {
+            if (isProcessing) return;
+            
+            isProcessing = true;
+            startBtn.disabled = true;
+            statusIndicator.className = "status-indicator status-processing";
+            displayText.textContent = "Iniciando sistema...";
+            pointsDisplay.textContent = "";
+            
+            // Simular tiempo de inicio
+            setTimeout(() => {
+                requestCard();
+            }, 1500);
+        }
+        
+        // Función para solicitar tarjeta
+        function requestCard() {
+            displayText.textContent = "Inserte su tarjeta de puntos";
+            cardSlot.style.display = "block";
+            
+            // Simular detección de tarjeta después de 2 segundos
+            setTimeout(() => {
+                cardSlot.style.display = "none";
+                requestWaste();
+            }, 2000);
+        }
+        
+        // Función para solicitar residuos
+        function requestWaste() {
+            displayText.textContent = "Ingrese los residuos a procesar";
+            wasteInput.style.display = "block";
+            
+            // Simular procesamiento después de 3 segundos
+            setTimeout(() => {
+                wasteInput.style.display = "none";
+                processWaste();
+            }, 3000);
+        }
+        
+        // Función para procesar los residuos
+        function processWaste() {
+            // Seleccionar un tipo de residuo aleatorio
+            const randomWaste = wasteTypes[Math.floor(Math.random() * wasteTypes.length)];
+            
+            if (randomWaste === "no son desechos") {
+                displayText.textContent = "No se procesan puntos: " + randomWaste;
+                pointsDisplay.textContent = "0 puntos";
+                machineDisplay.style.backgroundColor = "#ffebee";
+                machineDisplay.style.borderColor = "#ef9a9a";
+            } else {
+                // Generar puntos aleatorios entre 10 y 100
+                currentPoints = Math.floor(Math.random() * 91) + 10;
+                displayText.textContent = "Tipo detectado: " + randomWaste;
+                pointsDisplay.textContent = currentPoints + " puntos ganados!";
+                machineDisplay.style.backgroundColor = "#e8f5e9";
+                machineDisplay.style.borderColor = "#c8e6c9";
+                
+                // Mostrar alerta con SweetAlert2
+                Swal.fire({
+                    title: '¡Puntos acumulados!',
+                    text: `Has ganado ${currentPoints} puntos por reciclar ${randomWaste}.`,
+                    icon: 'success',
+                    confirmButtonText: 'Aceptar'
+                });
+            }
+            
+            // Finalizar proceso
+            setTimeout(() => {
+                resetMachine();
+            }, 3000);
+        }
+        
+        // Función para resetear la máquina
+        function resetMachine() {
+            isProcessing = false;
+            startBtn.disabled = false;
+            statusIndicator.className = "status-indicator status-off";
+            displayText.textContent = "Presione INICIAR para comenzar";
+            pointsDisplay.textContent = "";
+            machineDisplay.style.backgroundColor = "#e8f5e9";
+            machineDisplay.style.borderColor = "#c8e6c9";
+        }
+        
+        // Event listener para el botón de inicio
+        startBtn.addEventListener('click', startProcess);
+    </script>
+</body>
+</html>

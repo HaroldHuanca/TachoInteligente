@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tacho Inteligente Ecológico</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+            background-image: url('https://images.unsplash.com/photo-1448375240586-882707db888b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        
+        .container {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 500px;
+            padding: 30px;
+            text-align: center;
+            backdrop-filter: blur(3px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        h1 {
+            color: #2e7d32;
+            margin-bottom: 30px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .machine-display {
+            background-color: rgba(232, 245, 233, 0.8);
+            border: 2px solid #c8e6c9;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: all 0.5s;
+        }
+        
+        .display-text {
+            font-size: 1.2rem;
+            margin: 10px 0;
+        }
+        
+        .points-display {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2e7d32;
+            margin-top: 10px;
+        }
+        
+        .btn {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 15px;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn i {
+            margin-right: 10px;
+        }
+        
+        .btn:hover {
+            background-color: #388e3c;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .machine-icon {
+            font-size: 3rem;
+            color: #4caf50;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .status-indicator {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-left: 10px;
+        }
+        
+        .status-on {
+            background-color: #4caf50;
+            box-shadow: 0 0 10px #4caf50;
+        }
+        
+        .status-off {
+            background-color: #f44336;
+        }
+        
+        .status-processing {
+            background-color: #ffc107;
+            box-shadow: 0 0 10px #ffc107;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .card-slot {
+            width: 80%;
+            height: 5px;
+            background-color: #bdbdbd;
+            margin: 20px auto;
+            border-radius: 0 0 5px 5px;
+            position: relative;
+            display: none;
+        }
+        
+        .card-slot::after {
+            content: "";
+            position: absolute;
+            top: -15px;
+            left: 0;
+            right: 0;
+            margin: auto;
+            width: 60%;
+            height: 20px;
+            background-color: #757575;
+            border-radius: 5px 5px 0 0;
+        }
+        
+        .waste-input {
+            width: 80%;
+            height: 30px;
+            background-color: #e0e0e0;
+            margin: 20px auto;
+            border-radius: 5px;
+            position: relative;
+            overflow: hidden;
+            display: none;
+        }
+        
+        .waste-input::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+            animation: shine 2s infinite;
+        }
+        
+        @keyframes shine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .eco-tip {
+            font-size: 0.9rem;
+            color: #2e7d32;
+            margin-top: 20px;
+            padding: 10px;
+            background-color: rgba(200, 230, 201, 0.5);
+            border-radius: 5px;
+            font-style: italic;
+        }
+        
+        .processing-message {
+            display: none;
+            font-size: 1.1rem;
+            color: #ff9800;
+            margin: 10px 0;
+        }
+        
+        .processing-message i {
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="machine-icon">
+            <i class="fas fa-recycle"></i>
+        </div>
+        <h1>Tacho Inteligente Ecológico <span class="status-indicator status-off" id="status-indicator"></span></h1>
+        
+        <div class="machine-display" id="machine-display">
+            <div class="display-text" id="display-text">Presione INICIAR para comenzar</div>
+            <div class="processing-message" id="processing-message">
+                <i class="fas fa-cog"></i> Procesando...
+            </div>
+            <div class="points-display" id="points-display"></div>
+        </div>
+        
+        <div class="eco-tip" id="eco-tip">
+            Cada pequeña acción cuenta. ¡Reciclar hoy es vivir mañana!
+        </div>
+        
+        <div class="card-slot" id="card-slot"></div>
+        <div class="waste-input" id="waste-input"></div>
+        
+        <button class="btn" id="start-btn">
+            <i class="fas fa-leaf"></i> INICIAR PROCESO
+        </button>
+    </div>
+
+    <script>
+        // Elementos del DOM
+        const startBtn = document.getElementById('start-btn');
+        const displayText = document.getElementById('display-text');
+        const pointsDisplay = document.getElementById('points-display');
+        const statusIndicator = document.getElementById('status-indicator');
+        const cardSlot = document.getElementById('card-slot');
+        const wasteInput = document.getElementById('waste-input');
+        const machineDisplay = document.getElementById('machine-display');
+        const processingMessage = document.getElementById('processing-message');
+        const ecoTip = document.getElementById('eco-tip');
+        
+        // Variables de estado
+        let isProcessing = false;
+        let currentPoints = 0;
+        
+        // Tipos de residuos posibles
+        const wasteTypes = [
+            "desechos orgánicos",
+            "desechos inorgánicos",
+            "no son desechos"
+        ];
+        
+        // Consejos ecológicos
+        const ecoTips = [
+            "Reciclar una tonelada de papel salva 17 árboles.",
+            "El vidrio tarda 4000 años en degradarse. ¡Recíclalo!",
+            "Separar tus residuos ayuda a reducir la contaminación.",
+            "Los desechos orgánicos pueden convertirse en compost para plantas.",
+            "Cada persona genera aproximadamente 1 kg de basura al día.",
+            "Reciclar aluminio ahorra el 95% de la energía necesaria para producirlo nuevo.",
+            "El plástico en el océano mata a más de 1 millón de animales marinos al año.",
+            "Reducir y reutilizar son tan importantes como reciclar."
+        ];
+        
+        // Función para mostrar consejos ecológicos
+        function showRandomEcoTip() {
+            const randomTip = ecoTips[Math.floor(Math.random() * ecoTips.length)];
+            ecoTip.textContent = randomTip;
+        }
+        
+        // Mostrar primer consejo
+        showRandomEcoTip();
+        
+        // Función para iniciar el proceso
+        function startProcess() {
+            if (isProcessing) return;
+            
+            isProcessing = true;
+            startBtn.disabled = true;
+            statusIndicator.className = "status-indicator status-processing";
+            displayText.textContent = "Iniciando sistema ecológico...";
+            pointsDisplay.textContent = "";
+            
+            // Mostrar mensaje de concientización
+            Swal.fire({
+                title: '¡Bienvenido al reciclaje consciente!',
+                text: 'Al reciclar correctamente, estás contribuyendo a un planeta más limpio y sostenible.',
+                icon: 'info',
+                confirmButtonText: 'Continuar',
+                confirmButtonColor: '#4caf50'
+            });
+            
+            // Simular tiempo de inicio (5 segundos)
+            setTimeout(() => {
+                requestCard();
+            }, 5000);
+        }
+        
+        // Función para solicitar tarjeta
+        function requestCard() {
+            displayText.textContent = "Por favor, inserte su tarjeta de puntos ecológicos";
+            cardSlot.style.display = "block";
+            showRandomEcoTip();
+            
+            // Simular detección de tarjeta después de 5 segundos
+            setTimeout(() => {
+                cardSlot.style.display = "none";
+                requestWaste();
+            }, 5000);
+        }
+        
+        // Función para solicitar residuos
+        function requestWaste() {
+            displayText.textContent = "Coloque los residuos en la abertura inferior";
+            wasteInput.style.display = "block";
+            showRandomEcoTip();
+            
+            // Simular procesamiento después de 5 segundos
+            setTimeout(() => {
+                wasteInput.style.display = "none";
+                processingMessage.style.display = "block";
+                displayText.textContent = "Analizando composición de los residuos...";
+                processWaste();
+            }, 5000);
+        }
+        
+        // Función para procesar los residuos
+        function processWaste() {
+            // Seleccionar un tipo de residuo aleatorio
+            const randomWaste = wasteTypes[Math.floor(Math.random() * wasteTypes.length)];
+            
+            // Ocultar mensaje de procesamiento
+            setTimeout(() => {
+                processingMessage.style.display = "none";
+                
+                if (randomWaste === "no son desechos") {
+                    displayText.textContent = "No se procesan puntos: " + randomWaste;
+                    pointsDisplay.textContent = "0 puntos";
+                    machineDisplay.style.backgroundColor = "rgba(255, 235, 238, 0.8)";
+                    machineDisplay.style.borderColor = "#ef9a9a";
+                    
+                    // Mensaje educativo
+                    Swal.fire({
+                        title: '¡Ups!',
+                        html: 'Estos materiales no pueden ser procesados.<br><br>Recuerda que solo debemos depositar <b>desechos reciclables</b> en estos contenedores.',
+                        icon: 'warning',
+                        confirmButtonText: 'Entendido',
+                        confirmButtonColor: '#ff9800'
+                    });
+                } else {
+                    // Generar puntos aleatorios entre 10 y 100
+                    currentPoints = Math.floor(Math.random() * 91) + 10;
+                    displayText.textContent = "Tipo detectado: " + randomWaste;
+                    pointsDisplay.textContent = currentPoints + " puntos ecológicos!";
+                    machineDisplay.style.backgroundColor = "rgba(232, 245, 233, 0.8)";
+                    machineDisplay.style.borderColor = "#c8e6c9";
+                    
+                    // Mensaje educativo según el tipo de residuo
+                    let educationalMessage = '';
+                    if (randomWaste === "desechos orgánicos") {
+                        educationalMessage = 'Los desechos orgánicos pueden convertirse en compost, reduciendo la necesidad de fertilizantes químicos.';
+                    } else {
+                        educationalMessage = 'Los materiales inorgánicos reciclados pueden convertirse en nuevos productos, ahorrando recursos naturales.';
+                    }
+                    
+                    // Mostrar alerta con SweetAlert2
+                    Swal.fire({
+                        title: `¡${currentPoints} puntos ecológicos ganados!`,
+                        html: `Por reciclar <b>${randomWaste}</b> has contribuido al medio ambiente.<br><br>${educationalMessage}`,
+                        icon: 'success',
+                        confirmButtonText: '¡Gracias!',
+                        confirmButtonColor: '#4caf50'
+                    });
+                }
+                
+                // Mostrar nuevo consejo ecológico
+                showRandomEcoTip();
+                
+                // Finalizar proceso
+                setTimeout(() => {
+                    resetMachine();
+                }, 3000);
+            }, 3000); // Tiempo adicional de "procesamiento"
+        }
+        
+        // Función para resetear la máquina
+        function resetMachine() {
+            isProcessing = false;
+            startBtn.disabled = false;
+            statusIndicator.className = "status-indicator status-off";
+            displayText.textContent = "Presione INICIAR para un nuevo reciclaje";
+            pointsDisplay.textContent = "";
+            machineDisplay.style.backgroundColor = "rgba(232, 245, 233, 0.8)";
+            machineDisplay.style.borderColor = "#c8e6c9";
+        }
+        
+        // Event listener para el botón de inicio
+        startBtn.addEventListener('click', startProcess);
+    </script>
+</body>
+</html>
