@@ -114,14 +114,11 @@
             flex-direction: column;
             justify-content: center;
             transition: all 0.5s;
-            position: relative;
-            overflow: hidden;
         }
 
         .display-text {
             font-size: 1.2rem;
             margin: 10px 0;
-            z-index: 2;
         }
 
         .points-display {
@@ -129,7 +126,6 @@
             font-weight: bold;
             color: #2e7d32;
             margin-top: 10px;
-            z-index: 2;
         }
 
         .btn {
@@ -212,137 +208,57 @@
 
         .card-slot {
             width: 80%;
-            height: 60px;
-            background-color: #e0e0e0;
+            height: 5px;
+            background-color: #bdbdbd;
             margin: 20px auto;
-            border-radius: 5px;
+            border-radius: 0 0 5px 5px;
             position: relative;
-            overflow: hidden;
             display: none;
-            border: 2px solid #bdbdbd;
         }
 
-        .card {
-            width: 50px;
-            height: 30px;
-            background: linear-gradient(135deg, #2196F3, #64B5F6);
-            border-radius: 5px;
+        .card-slot::after {
+            content: "";
             position: absolute;
-            top: 15px;
-            left: -60px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 0.7rem;
-            font-weight: bold;
-            z-index: 2;
-        }
-
-        .card-chip {
-            width: 10px;
-            height: 8px;
-            background: gold;
-            border-radius: 2px;
-            position: absolute;
-            left: 5px;
-            top: 10px;
-        }
-
-        .card::after {
-            content: "ECO";
-            position: absolute;
-            right: 5px;
-            bottom: 5px;
-            font-size: 0.6rem;
+            top: -15px;
+            left: 0;
+            right: 0;
+            margin: auto;
+            width: 60%;
+            height: 20px;
+            background-color: #757575;
+            border-radius: 5px 5px 0 0;
         }
 
         .waste-input {
             width: 80%;
-            height: 100px;
+            height: 30px;
             background-color: #e0e0e0;
             margin: 20px auto;
             border-radius: 5px;
             position: relative;
             overflow: hidden;
             display: none;
-            border: 2px solid #bdbdbd;
         }
 
-        .waste-bag {
-            width: 40px;
-            height: 60px;
-            background-color: #8BC34A;
-            border-radius: 3px;
-            position: absolute;
-            bottom: -70px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 2;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.5rem;
-        }
-
-        .waste-bag::before {
+        .waste-input::before {
             content: "";
             position: absolute;
-            top: -10px;
-            left: 10px;
-            width: 20px;
-            height: 10px;
-            background-color: #8BC34A;
-            border-radius: 5px 5px 0 0;
-        }
-
-        .scanning-beam {
-            position: absolute;
-            width: 100%;
-            height: 3px;
-            background: linear-gradient(to right, transparent, rgba(76, 175, 80, 0.7), transparent);
             top: 0;
             left: 0;
-            display: none;
-            animation: scan 2s linear infinite;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+            animation: shine 2s infinite;
         }
 
-        @keyframes scan {
+        @keyframes shine {
             0% {
-                top: 0;
-                opacity: 0;
+                transform: translateX(-100%);
             }
-            10% {
-                opacity: 1;
-            }
-            90% {
-                opacity: 1;
-            }
+
             100% {
-                top: 100%;
-                opacity: 0;
+                transform: translateX(100%);
             }
-        }
-
-        .processing-animation {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            display: none;
-            z-index: 1;
-        }
-
-        .processing-particle {
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background-color: #4CAF50;
-            opacity: 0.6;
         }
 
         .eco-tip {
@@ -360,7 +276,6 @@
             font-size: 1.1rem;
             color: #ff9800;
             margin: 10px 0;
-            z-index: 2;
         }
 
         .processing-message i {
@@ -407,26 +322,6 @@
         .nav-btn:hover {
             background-color: #0b7dda;
         }
-
-        /* Animación de partículas para éxito */
-        @keyframes float-up {
-            0% {
-                transform: translateY(0) scale(1);
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-100px) scale(0.5);
-                opacity: 0;
-            }
-        }
-
-        .success-particle {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            animation: float-up 1.5s forwards;
-        }
     </style>
 </head>
 
@@ -449,24 +344,14 @@
                     <i class="fas fa-cog"></i> Procesando...
                 </div>
                 <div class="points-display" id="points-display"></div>
-                <div class="scanning-beam" id="scanning-beam"></div>
-                <div class="processing-animation" id="processing-animation"></div>
             </div>
 
             <div class="eco-tip" id="eco-tip">
                 Cada pequeña acción cuenta. ¡Reciclar hoy es vivir mañana!
             </div>
 
-            <div class="card-slot" id="card-slot">
-                <div class="card" id="card">
-                    <div class="card-chip"></div>
-                </div>
-            </div>
-            <div class="waste-input" id="waste-input">
-                <div class="waste-bag" id="waste-bag">
-                    <i class="fas fa-trash-alt"></i>
-                </div>
-            </div>
+            <div class="card-slot" id="card-slot"></div>
+            <div class="waste-input" id="waste-input"></div>
 
             <button class="btn" id="start-btn">
                 <i class="fas fa-leaf"></i> INICIAR PROCESO
@@ -526,10 +411,6 @@
         const machineDisplay = document.getElementById('machine-display');
         const processingMessage = document.getElementById('processing-message');
         const ecoTip = document.getElementById('eco-tip');
-        const card = document.getElementById('card');
-        const wasteBag = document.getElementById('waste-bag');
-        const scanningBeam = document.getElementById('scanning-beam');
-        const processingAnimation = document.getElementById('processing-animation');
 
         // Variables de estado
         let isProcessing = false;
@@ -563,71 +444,6 @@
         // Mostrar primer consejo
         showRandomEcoTip();
 
-        // Función para crear partículas de procesamiento
-        function createProcessingParticles() {
-            processingAnimation.innerHTML = '';
-            processingAnimation.style.display = 'block';
-            
-            for (let i = 0; i < 20; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'processing-particle';
-                particle.style.left = `${Math.random() * 100}%`;
-                particle.style.top = `${Math.random() * 100}%`;
-                particle.style.backgroundColor = `hsl(${Math.random() * 60 + 100}, 70%, 60%)`;
-                particle.style.width = `${Math.random() * 10 + 5}px`;
-                particle.style.height = particle.style.width;
-                particle.style.animation = `float-up ${Math.random() * 1 + 1}s linear infinite`;
-                particle.style.animationDelay = `${Math.random() * 2}s`;
-                processingAnimation.appendChild(particle);
-            }
-        }
-
-        // Función para crear partículas de éxito
-        function createSuccessParticles() {
-            for (let i = 0; i < 30; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'success-particle';
-                particle.style.left = `${Math.random() * 100}%`;
-                particle.style.bottom = '0';
-                particle.style.backgroundColor = `hsl(${Math.random() * 60 + 100}, 70%, 60%)`;
-                particle.style.width = `${Math.random() * 10 + 5}px`;
-                particle.style.height = particle.style.width;
-                particle.style.animationDuration = `${Math.random() * 1 + 1}s`;
-                machineDisplay.appendChild(particle);
-                
-                // Eliminar la partícula después de la animación
-                setTimeout(() => {
-                    particle.remove();
-                }, 1500);
-            }
-        }
-
-        // Función para animar la tarjeta
-        function animateCard() {
-            card.style.transition = 'left 2s ease-in-out';
-            card.style.left = 'calc(100% + 10px)';
-            
-            setTimeout(() => {
-                card.style.transition = 'none';
-                card.style.left = '-60px';
-                setTimeout(() => {
-                    card.style.transition = 'left 2s ease-in-out';
-                    card.style.left = '50%';
-                    card.style.transform = 'translateX(-50%)';
-                }, 100);
-            }, 2500);
-        }
-
-        // Función para animar la bolsa de residuos
-        function animateWasteBag() {
-            wasteBag.style.transition = 'bottom 1.5s ease-in-out';
-            wasteBag.style.bottom = '10px';
-            
-            setTimeout(() => {
-                scanningBeam.style.display = 'block';
-            }, 1500);
-        }
-
         // Función para iniciar el proceso
         function startProcess() {
             if (isProcessing) return;
@@ -637,8 +453,6 @@
             statusIndicator.className = "status-indicator status-processing";
             displayText.textContent = "Iniciando sistema ecológico...";
             pointsDisplay.textContent = "";
-            machineDisplay.style.backgroundColor = "rgba(232, 245, 233, 0.8)";
-            machineDisplay.style.borderColor = "#c8e6c9";
 
             // Mostrar mensaje de concientización
             Swal.fire({
@@ -649,10 +463,10 @@
                 confirmButtonColor: '#4caf50'
             });
 
-            // Simular tiempo de inicio (3 segundos)
+            // Simular tiempo de inicio (5 segundos)
             setTimeout(() => {
                 requestCard();
-            }, 3000);
+            }, 5000);
         }
 
         // Función para solicitar tarjeta
@@ -660,13 +474,12 @@
             displayText.textContent = "Por favor, inserte su tarjeta de puntos ecológicos";
             cardSlot.style.display = "block";
             showRandomEcoTip();
-            animateCard();
 
-            // Simular detección de tarjeta después de 4 segundos
+            // Simular detección de tarjeta después de 5 segundos
             setTimeout(() => {
                 cardSlot.style.display = "none";
                 requestWaste();
-            }, 4000);
+            }, 5000);
         }
 
         // Función para solicitar residuos
@@ -674,17 +487,14 @@
             displayText.textContent = "Coloque los residuos en la abertura inferior";
             wasteInput.style.display = "block";
             showRandomEcoTip();
-            animateWasteBag();
 
-            // Simular procesamiento después de 4 segundos
+            // Simular procesamiento después de 5 segundos
             setTimeout(() => {
                 wasteInput.style.display = "none";
-                scanningBeam.style.display = "none";
                 processingMessage.style.display = "block";
                 displayText.textContent = "Analizando composición de los residuos...";
-                createProcessingParticles();
                 processWaste();
-            }, 4000);
+            }, 5000);
         }
 
         // Función para procesar los residuos
@@ -695,7 +505,6 @@
             // Ocultar mensaje de procesamiento
             setTimeout(() => {
                 processingMessage.style.display = "none";
-                processingAnimation.style.display = "none";
 
                 if (randomWaste === "no son desechos") {
                     displayText.textContent = "No se procesan puntos: " + randomWaste;
@@ -718,7 +527,6 @@
                     pointsDisplay.textContent = currentPoints + " puntos ecológicos!";
                     machineDisplay.style.backgroundColor = "rgba(232, 245, 233, 0.8)";
                     machineDisplay.style.borderColor = "#c8e6c9";
-                    createSuccessParticles();
 
                     // Mensaje educativo según el tipo de residuo
                     let educationalMessage = '';
@@ -757,12 +565,6 @@
             pointsDisplay.textContent = "";
             machineDisplay.style.backgroundColor = "rgba(232, 245, 233, 0.8)";
             machineDisplay.style.borderColor = "#c8e6c9";
-            
-            // Resetear animaciones
-            card.style.left = '-60px';
-            card.style.transform = 'none';
-            wasteBag.style.bottom = '-70px';
-            wasteBag.style.transition = 'none';
         }
 
         // Event listener para el botón de inicio
